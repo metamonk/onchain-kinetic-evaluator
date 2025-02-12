@@ -1,6 +1,4 @@
 import LoginCard from "@/components/LoginCard"
-import { redirect } from "next/navigation"
-import { getUserAuth } from "@/lib/auth"
 
 export default async function LoginPage() {
   return (

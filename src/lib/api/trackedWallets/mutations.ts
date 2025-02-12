@@ -1,3 +1,4 @@
+import { getUserAndUserData } from "@/lib/auth"
 import { db } from "@/lib/db/index";
 import { 
   TrackedWalletId, 
@@ -9,9 +10,18 @@ import {
 } from "@/lib/db/schema/trackedWallets";
 
 export const createTrackedWallet = async (trackedWallet: NewTrackedWalletParams) => {
+  // Require userData when first creating a trackedWallet
+  const { userData } = await getUserAndUserData();
+
   const newTrackedWallet = insertTrackedWalletSchema.parse(trackedWallet);
+
   try {
-    const t = await db.trackedWallet.create({ data: newTrackedWallet });
+    const t = await db.trackedWallet.create({ 
+      data: {
+        ...newTrackedWallet,
+        userId: userData?.id ?? ""
+      } 
+    });
     return { trackedWallet: t };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";

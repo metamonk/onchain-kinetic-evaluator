@@ -1,9 +1,22 @@
 import { db } from "@/lib/db/index"
-import { authenticateRequest } from "@/lib/auth/privy"
+import {
+  privyClient,
+  getUserAuth
+} from "@/lib/auth"
 
 export async function createTRPCContext(opts: { headers: Headers }) {
-  const user = await authenticateRequest();
+  const token = opts.headers.get('privy-token');
 
+  let user = null;
+
+  if (token) {
+    try {
+      user = await privyClient.verifyAuthToken(token);
+    } catch (error) {
+      console.error('Failed to verify token:', error);
+    }
+  }
+  
   return {
     db,
     user,

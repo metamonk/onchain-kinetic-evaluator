@@ -1,6 +1,6 @@
 "use client";
 
-import { TrackedWallet, NewTrackedWalletParams, insertTrackedWalletParams } from "@/lib/db/schema/trackedWallets";
+import { NewTrackedWalletParams, insertTrackedWalletParams } from "@/lib/db/schema/trackedWallets";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -19,41 +19,26 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const TrackedWalletForm = ({
-  trackedWallet,
-  closeModal,
-  userId,
-}: {
-  trackedWallet?: TrackedWallet;
-  closeModal?: () => void;
-  userId?: string;
-}) => {
-  const editing = !!trackedWallet?.id;
-
+const AddTrackedWalletForm = () => {
   const router = useRouter();
   const utils = trpc.useUtils();
 
   const form = useForm<z.infer<typeof insertTrackedWalletParams>>({
-    // latest Zod release has introduced a TS error with zodResolver
-    // open issue: https://github.com/colinhacks/zod/issues/2663
-    // errors locally but not in production
     resolver: zodResolver(insertTrackedWalletParams),
-    defaultValues: trackedWallet ?? {
-      address: trackedWallet?.address ?? "",
-      label: trackedWallet?.label ?? "",
+    defaultValues: {
+      address: "",
+      label: "",
     },
   });
 
   const onSuccess = async (action: "create" | "update" | "delete", data?: any) => {
-    console.log(`${action} success:`, data);
     if (data?.error) {
       toast.error(data.error);
       return;
     }
-
     await utils.trackedWallets.getTrackedWallets.invalidate();
     router.refresh();
-    if (closeModal) closeModal();
+    form.reset();
     toast.success(`Tracked Wallet ${action}d!`);
   };
 
@@ -67,25 +52,13 @@ const TrackedWalletForm = ({
       onError: (err) => onError("create", err.message),
     });
 
-  const { mutate: updateTrackedWallet, isLoading: isUpdating } =
-    trpc.trackedWallets.updateTrackedWallet.useMutation({
-      onSuccess: (res) => onSuccess("update"),
-      onError: (err) => onError("update", err.message),
-    });
-
-  const { mutate: deleteTrackedWallet, isLoading: isDeleting } =
-    trpc.trackedWallets.deleteTrackedWallet.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
-      onError: (err) => onError("delete", err.message),
-    });
-
   const onSubmit = (values: NewTrackedWalletParams) => {
-    if (editing) {
-      updateTrackedWallet({ ...values, id: trackedWallet.id });
-    } else {
-      createTrackedWallet(values);
-    }
+
+    createTrackedWallet(values);
   };
+
+  const errors = form.formState.errors;
+  console.log({errors})
 
   return (
     <Form {...form}>
@@ -119,26 +92,15 @@ const TrackedWalletForm = ({
         <Button
           type="submit"
           className="mr-1"
-          disabled={isCreating || isUpdating}
+          disabled={isCreating}
         >
-          {editing
-            ? `Sav${isUpdating ? "ing..." : "e"}`
-            : `Creat${isCreating ? "ing..." : "e"}`}
+          Add Wallet
         </Button>
-        {editing ? (
-          <Button
-            type="button"
-            variant={"destructive"}
-            onClick={() => deleteTrackedWallet({ id: trackedWallet.id })}
-          >
-            Delet{isDeleting ? "ing..." : "e"}
-          </Button>
-        ) : null}
       </form>
     </Form>
   );
 };
 
-export default TrackedWalletForm;
+export default AddTrackedWalletForm;
 
 

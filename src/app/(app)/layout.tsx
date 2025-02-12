@@ -1,13 +1,13 @@
 import { getTokensFromCookies } from "@/lib/auth"
 import TrpcProvider from "@/lib/trpc/Provider";
-import { validateProtectedRoute } from "@/lib/auth/guard"
+import { validateUserRoute } from "@/lib/auth/guard"
 
 export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await validateProtectedRoute();
+  await validateUserRoute();
 
   const { privyToken } = await getTokensFromCookies();
   return (

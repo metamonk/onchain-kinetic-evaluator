@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getPathname, getUserAuth } from "@/lib/auth";
 import { api } from "@/lib/trpc/api";
-import { User } from "../db/schema/users"
+import { User } from "@/lib/db/schema/users"
 
 export async function fetchUserWithPrivyId(privyId: string): Promise<User | null> {
 	try {
@@ -19,30 +19,34 @@ export async function getUserAndUserData() {
 	return { user, userData };
 }
 
-export async function validateAuthRoute() {
+export async function validateUserRoute() {
 	const { user, userData } = await getUserAndUserData();
 	
-	if (user && userData) {
-		redirect("/dashboard");
+	// Must be authenticated
+	if (!user) {
+		redirect("/login");
 	}
-	
-	if (user && !userData) {
+
+	// Must be onboarded
+	if (!userData) {
 		redirect("/onboarding");
 	}
 
 	return { user, userData };
 }
 
-export async function validateProtectedRoute() {
+export async function validateGuestRoute() {
 	const { user, userData } = await getUserAndUserData();
-	const pathname = await getPathname();
-	
-	if (!user && pathname !== "/login") {
-		redirect("/login");
+	const path = await getPathname();
+
+	// If user is authenticated but not onboarded, must complete onboarding
+	if (user && !userData && path !== '/onboarding') {
+		redirect("/onboarding");
 	}
 
-	if (user && !userData) {
-		redirect("/onboarding");
+	// If fully authenticated and onboarded user tries to access login/onboarding
+	if (user && userData && (path === '/login' || path === '/onboarding')) {
+		redirect("/dashboard");
 	}
 
 	return { user, userData };

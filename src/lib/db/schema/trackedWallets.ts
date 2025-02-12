@@ -7,19 +7,20 @@ import { getTrackedWallets } from "@/lib/api/trackedWallets/queries";
 // Schema for trackedWallets - used to validate API requests
 const baseSchema = trackedWalletSchema.omit(timestamps)
 
-export const insertTrackedWalletSchema = baseSchema.omit({ id: true });
+export const insertTrackedWalletSchema = baseSchema.omit({ id: true, userId: true });
 export const insertTrackedWalletParams = baseSchema.extend({
   address: z.string().min(1),
-  userId: z.string().min(1)
+  label: z.string().min(1)
 }).omit({ 
-  id: true
+  id: true,
+  userId: true
 });
 
-export const updateTrackedWalletSchema = baseSchema;
+export const updateTrackedWalletSchema = baseSchema.omit({ userId: true });
 export const updateTrackedWalletParams = updateTrackedWalletSchema.extend({
   address: z.string().min(1),
-  userId: z.string().min(1)
-})
+  label: z.string().min(1)
+});
 export const trackedWalletIdSchema = baseSchema.pick({ id: true });
 
 // Types for trackedWallets - used to type API request params and within Components

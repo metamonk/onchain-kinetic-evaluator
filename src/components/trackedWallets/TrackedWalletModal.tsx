@@ -14,7 +14,7 @@ import { TrackedWallet } from "@/lib/db/schema/trackedWallets";
 
 export default function TrackedWalletModal({ 
   trackedWallet,
-  emptyState,
+  emptyState
 }: { 
   trackedWallet?: TrackedWallet;
   emptyState?: boolean;
@@ -22,6 +22,7 @@ export default function TrackedWalletModal({
   const [open, setOpen] = useState(false);
   const closeModal = () => setOpen(false);
   const editing = !!trackedWallet?.id;
+  
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>

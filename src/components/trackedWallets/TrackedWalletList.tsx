@@ -2,6 +2,9 @@
 import { CompleteTrackedWallet } from "@/lib/db/schema/trackedWallets";
 import { trpc } from "@/lib/trpc/client";
 import TrackedWalletModal from "./TrackedWalletModal";
+import { Copy, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import React from "react";
 
 
 export default function TrackedWalletList({ trackedWallets }: { trackedWallets: CompleteTrackedWallet[] }) {
@@ -24,10 +27,29 @@ export default function TrackedWalletList({ trackedWallets }: { trackedWallets: 
 }
 
 const TrackedWallet = ({ trackedWallet }: { trackedWallet: CompleteTrackedWallet }) => {
+  const [copied, setCopied] = React.useState(false);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(trackedWallet.address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+  };
+
   return (
     <li className="flex justify-between my-2">
-      <div className="w-full">
-        <div>{trackedWallet.address}</div>
+      <div className="w-full flex items-center gap-2">
+        <div>{trackedWallet.label}</div>
+        <Button
+          onClick={copyToClipboard}
+          variant="ghost"
+          size="icon"
+        >
+          {copied ? (
+            <Check className="w-4 h-4" />
+          ) : (
+            <Copy className="w-4 h-4" />
+          )}
+        </Button>
       </div>
       <TrackedWalletModal trackedWallet={trackedWallet} />
     </li>
