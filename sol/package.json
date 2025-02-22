@@ -1,0 +1,20 @@
+{
+  "name": "ocke-sol-notis",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "@solana/web3.js": "^2.0.0",
+    "async-sema": "^3.1.1",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "ws": "^8.18.0"
+  }
+}

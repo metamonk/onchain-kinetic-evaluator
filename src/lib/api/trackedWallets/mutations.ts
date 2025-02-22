@@ -8,12 +8,26 @@ import {
   insertTrackedWalletSchema, 
   trackedWalletIdSchema 
 } from "@/lib/db/schema/trackedWallets";
+import { categorizeWalletAddress } from "@/lib/utils"
 
 export const createTrackedWallet = async (trackedWallet: NewTrackedWalletParams) => {
   // Require userData when first creating a trackedWallet
   const { userData } = await getUserAndUserData();
 
-  const newTrackedWallet = insertTrackedWalletSchema.parse(trackedWallet);
+  const chain = categorizeWalletAddress(trackedWallet.address);
+
+  console.log({ chain });
+  
+  if (chain === 'INVALID') {
+    throw { error: 'Invalid wallet address' };
+  }
+
+  const newTrackedWallet = insertTrackedWalletSchema.parse({
+    ...trackedWallet,
+    chain
+  });
+
+  console.log({newTrackedWallet});
 
   try {
     const t = await db.trackedWallet.create({ 

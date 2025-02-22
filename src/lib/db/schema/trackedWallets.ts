@@ -3,7 +3,6 @@ import { z } from "zod";
 import { timestamps } from "@/lib/utils";
 import { getTrackedWallets } from "@/lib/api/trackedWallets/queries";
 
-
 // Schema for trackedWallets - used to validate API requests
 const baseSchema = trackedWalletSchema.omit(timestamps)
 
@@ -13,13 +12,16 @@ export const insertTrackedWalletParams = baseSchema.extend({
   label: z.string().min(1)
 }).omit({ 
   id: true,
-  userId: true
+  userId: true,
+  chain: true
 });
 
 export const updateTrackedWalletSchema = baseSchema.omit({ userId: true });
 export const updateTrackedWalletParams = updateTrackedWalletSchema.extend({
   address: z.string().min(1),
   label: z.string().min(1)
+}).omit({
+  chain: true
 });
 export const trackedWalletIdSchema = baseSchema.pick({ id: true });
 

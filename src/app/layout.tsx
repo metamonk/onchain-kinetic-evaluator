@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "O.C.K.E.",
-  description: "Onchain Kinetic Evaluator",
+  description: "On-chain Kinetic Evaluator",
 };
 
 export default async function RootLayout({
@@ -27,9 +27,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
           <Navbar />
           {children}

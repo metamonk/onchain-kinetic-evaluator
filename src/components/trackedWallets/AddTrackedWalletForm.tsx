@@ -1,6 +1,9 @@
 "use client";
 
-import { NewTrackedWalletParams, insertTrackedWalletParams } from "@/lib/db/schema/trackedWallets";
+import {
+  NewTrackedWalletParams,
+  insertTrackedWalletParams
+} from "@/lib/db/schema/trackedWallets"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -19,11 +22,19 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const AddTrackedWalletForm = () => {
+const AddTrackedWalletForm = ({
+  closeModal,
+}: {
+  closeModal?: () => void;
+}) => {
+
   const router = useRouter();
   const utils = trpc.useUtils();
 
   const form = useForm<z.infer<typeof insertTrackedWalletParams>>({
+    // latest Zod release has introduced a TS error with zodResolver
+    // open issue: https://github.com/colinhacks/zod/issues/2663
+    // errors locally but not in production
     resolver: zodResolver(insertTrackedWalletParams),
     defaultValues: {
       address: "",
@@ -32,13 +43,15 @@ const AddTrackedWalletForm = () => {
   });
 
   const onSuccess = async (action: "create" | "update" | "delete", data?: any) => {
+    console.log(`${action} success:`, data);
     if (data?.error) {
       toast.error(data.error);
       return;
     }
+
     await utils.trackedWallets.getTrackedWallets.invalidate();
     router.refresh();
-    form.reset();
+    if (closeModal) closeModal();
     toast.success(`Tracked Wallet ${action}d!`);
   };
 
@@ -52,13 +65,17 @@ const AddTrackedWalletForm = () => {
       onError: (err) => onError("create", err.message),
     });
 
+  const { mutate: updateTrackedWallet, isLoading: isUpdating } =
+    trpc.trackedWallets.updateTrackedWallet.useMutation({
+      onSuccess: (res) => onSuccess("update"),
+      onError: (err) => onError("update", err.message),
+    });
+
   const onSubmit = (values: NewTrackedWalletParams) => {
 
+    console.log("values", values);
     createTrackedWallet(values);
   };
-
-  const errors = form.formState.errors;
-  console.log({errors})
 
   return (
     <Form {...form}>
@@ -66,12 +83,12 @@ const AddTrackedWalletForm = () => {
         <FormField
           control={form.control}
           name="address"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Address</FormLabel>
-                <FormControl>
-            <Input {...field} value={field.value ?? ''} />
-          </FormControl>
-
+              <FormControl>
+                <Input {...field} value={field.value ?? ''} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -79,12 +96,12 @@ const AddTrackedWalletForm = () => {
         <FormField
           control={form.control}
           name="label"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Label</FormLabel>
-                <FormControl>
-            <Input {...field} value={field.value ?? ''} />
-          </FormControl>
-
+              <FormControl>
+                <Input {...field} value={field.value ?? ''} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -92,9 +109,9 @@ const AddTrackedWalletForm = () => {
         <Button
           type="submit"
           className="mr-1"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
         >
-          Add Wallet
+          {isCreating || isUpdating ? "Creating..." : "Create"}
         </Button>
       </form>
     </Form>

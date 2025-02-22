@@ -39,6 +39,7 @@ model TrackedWallet {
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  chain        Chain
 
   @@unique([address])
 }
@@ -56,4 +57,9 @@ model Transaction {
   raw       Json
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+}
+
+enum Chain {
+  SOL
+  EVM
 }

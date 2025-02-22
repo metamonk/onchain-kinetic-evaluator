@@ -7,8 +7,8 @@ interface LogoProps {
 }
 
 const Logo: React.FC<LogoProps> = ({
-  width = '250',
-  height = '250',
+  width = '25',
+  height = '25',
   viewBox = '0 0 250 250',
 }) => {
   return (
@@ -17,7 +17,7 @@ const Logo: React.FC<LogoProps> = ({
       height={height}
       viewBox={viewBox}
       xmlns="http://www.w3.org/2000/svg"
-      className="fill-current text-black dark:text-white"
+      className="fill-current text-black dark:text-white shadow-lg shadow-black/10"
     >
       <rect width="250" height="250" fill="white" />
       <path

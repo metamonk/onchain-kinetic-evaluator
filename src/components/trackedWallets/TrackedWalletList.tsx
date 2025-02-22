@@ -5,6 +5,7 @@ import TrackedWalletModal from "./TrackedWalletModal";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
+import { Card, CardDescription, CardTitle, CardHeader } from "../ui/card"
 
 
 export default function TrackedWalletList({ trackedWallets }: { trackedWallets: CompleteTrackedWallet[] }) {
@@ -19,7 +20,7 @@ export default function TrackedWalletList({ trackedWallets }: { trackedWallets: 
 
   return (
     <ul>
-      {t.trackedWallets.map((trackedWallet) => (
+      {t.trackedWallets.map((trackedWallet: CompleteTrackedWallet) => (
         <TrackedWallet trackedWallet={trackedWallet} key={trackedWallet.id} />
       ))}
     </ul>
@@ -51,24 +52,19 @@ const TrackedWallet = ({ trackedWallet }: { trackedWallet: CompleteTrackedWallet
           )}
         </Button>
       </div>
-      <TrackedWalletModal trackedWallet={trackedWallet} />
+      
     </li>
   );
 };
 
 const EmptyState = () => {
   return (
-    <div className="text-center">
-      <h3 className="mt-2 text-sm font-semibold text-secondary-foreground">
-        No tracked wallets
-      </h3>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Get started by creating a new tracked wallet.
-      </p>
-      <div className="mt-6">
-        <TrackedWalletModal emptyState={true} />
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>No tracked wallets</CardTitle>
+        <CardDescription>Get started by creating a new tracked wallet.</CardDescription>
+      </CardHeader>
+    </Card>
   );
 };
 

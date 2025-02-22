@@ -22,12 +22,11 @@ import { toast } from "sonner";
 const TrackedWalletForm = ({
   trackedWallet,
   closeModal,
-  userId,
 }: {
   trackedWallet?: TrackedWallet;
   closeModal?: () => void;
-  userId?: string;
 }) => {
+  
   const editing = !!trackedWallet?.id;
 
   const router = useRouter();
@@ -39,64 +38,60 @@ const TrackedWalletForm = ({
     // errors locally but not in production
     resolver: zodResolver(insertTrackedWalletParams),
     defaultValues: trackedWallet ?? {
-      address: trackedWallet?.address ?? "",
-      label: trackedWallet?.label ?? "",
+      address: "",
+     label: ""
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete", data?: any) => {
-    console.log(`${action} success:`, data);
-    if (data?.error) {
-      toast.error(data.error);
+  const onSuccess = async (action: "create" | "update" | "delete",
+    data?: { error?: string },
+  ) => {
+        if (data?.error) {
+      toast.error(data.error)
       return;
     }
 
     await utils.trackedWallets.getTrackedWallets.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-    toast.success(`Tracked Wallet ${action}d!`);
-  };
-
-  const onError = (action: "create" | "update" | "delete", error: string) => {
-    toast.error(`Error ${action}ing tracked wallet: ${error}`);
+        toast.success(`Tracked Wallet ${action}d!`);
   };
 
   const { mutate: createTrackedWallet, isLoading: isCreating } =
     trpc.trackedWallets.createTrackedWallet.useMutation({
-      onSuccess: (res) => onSuccess("create", res),
-      onError: (err) => onError("create", err.message),
+      onSuccess: (res) => onSuccess("create"),
+      onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateTrackedWallet, isLoading: isUpdating } =
     trpc.trackedWallets.updateTrackedWallet.useMutation({
       onSuccess: (res) => onSuccess("update"),
-      onError: (err) => onError("update", err.message),
+      onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteTrackedWallet, isLoading: isDeleting } =
     trpc.trackedWallets.deleteTrackedWallet.useMutation({
       onSuccess: (res) => onSuccess("delete"),
-      onError: (err) => onError("delete", err.message),
+      onError: (err) => onError("delete", { error: err.message }),
     });
 
-  const onSubmit = (values: NewTrackedWalletParams) => {
+  const handleSubmit = (values: NewTrackedWalletParams) => {
     if (editing) {
       updateTrackedWallet({ ...values, id: trackedWallet.id });
     } else {
       createTrackedWallet(values);
     }
   };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={"space-y-8"}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className={"space-y-8"}>
         <FormField
           control={form.control}
           name="address"
           render={({ field }) => (<FormItem>
               <FormLabel>Address</FormLabel>
                 <FormControl>
-            <Input {...field} value={field.value ?? ''} />
+            <Input {...field} />
           </FormControl>
 
               <FormMessage />
@@ -109,7 +104,7 @@ const TrackedWalletForm = ({
           render={({ field }) => (<FormItem>
               <FormLabel>Label</FormLabel>
                 <FormControl>
-            <Input {...field} value={field.value ?? ''} />
+            <Input {...field} />
           </FormControl>
 
               <FormMessage />
@@ -140,5 +135,3 @@ const TrackedWalletForm = ({
 };
 
 export default TrackedWalletForm;
-
-
