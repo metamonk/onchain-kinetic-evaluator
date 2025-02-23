@@ -1,7 +1,7 @@
 "use client";
 import { CompleteTrackedWallet } from "@/lib/db/schema/trackedWallets";
 import { trpc } from "@/lib/trpc/client";
-import TrackedWalletModal from "./TrackedWalletModal";
+import TrackedWalletModal from "@/components/trackedWallets/TrackedWalletModal";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
@@ -51,6 +51,7 @@ const TrackedWallet = ({ trackedWallet }: { trackedWallet: CompleteTrackedWallet
             <Copy className="w-4 h-4" />
           )}
         </Button>
+        <TrackedWalletModal trackedWallet={trackedWallet} emptyState={false} />
       </div>
       
     </li>

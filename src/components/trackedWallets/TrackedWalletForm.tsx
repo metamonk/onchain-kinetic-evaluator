@@ -1,6 +1,10 @@
 "use client";
 
-import { TrackedWallet, NewTrackedWalletParams, insertTrackedWalletParams } from "@/lib/db/schema/trackedWallets";
+import {
+  TrackedWallet,
+  NewTrackedWalletParams,
+  insertTrackedWalletParams
+} from "@/lib/db/schema/trackedWallets"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -26,7 +30,6 @@ const TrackedWalletForm = ({
   trackedWallet?: TrackedWallet;
   closeModal?: () => void;
 }) => {
-  
   const editing = !!trackedWallet?.id;
 
   const router = useRouter();
@@ -37,16 +40,20 @@ const TrackedWalletForm = ({
     // open issue: https://github.com/colinhacks/zod/issues/2663
     // errors locally but not in production
     resolver: zodResolver(insertTrackedWalletParams),
-    defaultValues: trackedWallet ?? {
+    defaultValues: trackedWallet ? {
+      address: trackedWallet.address,
+      label: trackedWallet.label ?? ""
+    } : {
       address: "",
-     label: ""
+      label: ""
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
     data?: { error?: string },
   ) => {
-        if (data?.error) {
+    if (data?.error) {
       toast.error(data.error)
       return;
     }
@@ -54,7 +61,14 @@ const TrackedWalletForm = ({
     await utils.trackedWallets.getTrackedWallets.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Tracked Wallet ${action}d!`);
+    toast.success(`Tracked Wallet ${action}d!`);
+  };
+
+  const onError = (
+    action: "create" | "update" | "delete",
+    error: { error: string },
+  ) => {
+    toast.error(`Error ${action}ing tracked wallet: ${error.error}`);
   };
 
   const { mutate: createTrackedWallet, isLoading: isCreating } =
