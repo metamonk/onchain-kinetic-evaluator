@@ -13,15 +13,11 @@ import { categorizeWalletAddress } from "@/lib/utils"
 export const createTrackedWallet = async (trackedWallet: NewTrackedWalletParams) => {
   // Require userData when first creating a trackedWallet
   const { userData } = await getUserAndUserData();
-
   const chain = categorizeWalletAddress(trackedWallet.address);
-
   console.log({ chain });
-  
   if (chain === 'INVALID') {
     throw { error: 'Invalid wallet address' };
   }
-
   const newTrackedWallet = insertTrackedWalletSchema.parse({
     ...trackedWallet,
     chain
@@ -46,9 +42,24 @@ export const createTrackedWallet = async (trackedWallet: NewTrackedWalletParams)
 
 export const updateTrackedWallet = async (id: TrackedWalletId, trackedWallet: UpdateTrackedWalletParams) => {
   const { id: trackedWalletId } = trackedWalletIdSchema.parse({ id });
-  const newTrackedWallet = updateTrackedWalletSchema.parse(trackedWallet);
+  
+  // Determine the chain based on the wallet address
+  const chain = categorizeWalletAddress(trackedWallet.address);
+  if (chain === 'INVALID') {
+    throw { error: 'Invalid wallet address' };
+  }
+
+  // Include the chain in the updated tracked wallet data
+  const updatedTrackedWallet = updateTrackedWalletSchema.parse({
+    ...trackedWallet,
+    chain
+  });
+
   try {
-    const t = await db.trackedWallet.update({ where: { id: trackedWalletId }, data: newTrackedWallet})
+    const t = await db.trackedWallet.update({ 
+      where: { id: trackedWalletId }, 
+      data: updatedTrackedWallet
+    });
     return { trackedWallet: t };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
