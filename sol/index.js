@@ -32,15 +32,10 @@ async function handleTransaction(signature, transaction, trackedWallets) {
 
     const matches = trackedWallets.filter(wallet => {
       const walletAddress = wallet.address;
-      // console.log(`\nChecking wallet: ${wallet.label} (${walletAddress})`);
-      // console.log('Is signer?', accountKeys[0] === walletAddress);
-      // console.log('Is in account keys?', accountKeys.includes(walletAddress));
-
       const isSigner = accountKeys[0] === walletAddress;
       const isInvolved = accountKeys.includes(walletAddress);
       const isInInstructions = message.instructions.some(ix => {
         const isInAccounts = ix.accounts.some(accIndex => accountKeys[accIndex] === walletAddress);
-        // console.log('Is in instruction accounts?', isInAccounts);
         return isInAccounts;
       });
 
@@ -57,23 +52,15 @@ async function handleTransaction(signature, transaction, trackedWallets) {
         console.log('⚡ Status:', transaction.meta?.err ? 'Failed' : 'Success');
       });
 
-      try {
-        wss.clients.forEach(client => {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({
-              type: 'TRANSACTION',
-              data: {
-                signature,
-                transaction,
-                wallets: matches,
-                logs: transaction.meta?.logMessages || []
-              }
-            }, bigIntReplacer)); // Use the custom replacer
-          }
-        });
-      } catch (error) {
-        console.error('❌ Error sending transaction data:', error);
-      }
+      // Save transaction to the database
+      await saveTransactionToDatabase({
+        chain: 'SOL',
+        transactionHash: signature,
+        from: accountKeys[0], // Assuming the first account is the sender
+        to: accountKeys[1],   // Assuming the second account is the receiver
+        transaction,
+        wallets: matches
+      });
 
       return matches;
     } else {
@@ -123,11 +110,7 @@ async function startSolanaMonitoring() {
   const limiter = RateLimit(10);
   await updateTrackedWallets();
 
-  // console.log('📝 Current tracked wallets:', trackedWallets);
-  
   const wsUrl = `wss://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`;
-  // console.log('Connecting to WebSocket URL:', wsUrl);
-
   const ws = new WebSocket(wsUrl);
 
   ws.on('open', async () => {
@@ -225,3 +208,12 @@ wss.on('connection', (ws) => {
 });
 
 console.log('🚀 WebSocket server running on ws://localhost:8080');
+
+async function saveTransactionToDatabase(transactionData) {
+  try {
+    const response = await axios.post('http://localhost:3000/api/transactions', transactionData);
+    console.log('Transaction saved:', response.data);
+  } catch (error) {
+    console.error('Error saving transaction:', error);
+  }
+}

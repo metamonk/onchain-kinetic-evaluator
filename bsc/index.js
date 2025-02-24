@@ -35,6 +35,16 @@ async function handleTransaction(transactionHash) {
         console.log('⚡ Status:', transaction.blockNumber ? 'Confirmed' : 'Pending');
       });
 
+      // Save transaction to the database
+      await saveTransactionToDatabase({
+        chain: 'EVM',
+        transactionHash,
+        from: transaction.from,
+        to: transaction.to,
+        transaction,
+        wallets: matches
+      });
+
       wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({
@@ -104,4 +114,13 @@ wss.on('connection', (ws) => {
   });
 });
 
-console.log('🚀 BSC WebSocket server running on ws://localhost:8081'); 
+console.log('🚀 BSC WebSocket server running on ws://localhost:8081');
+
+async function saveTransactionToDatabase(transactionData) {
+  try {
+    const response = await axios.post('http://localhost:3000/api/transactions', transactionData);
+    console.log('Transaction saved:', response.data);
+  } catch (error) {
+    console.error('Error saving transaction:', error);
+  }
+} 

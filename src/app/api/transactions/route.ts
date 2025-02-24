@@ -12,11 +12,11 @@ import {
   insertTransactionParams,
   updateTransactionParams 
 } from "@/lib/db/schema/transactions";
-import { getTransactionById } from "@/lib/api/transactions/queries"
 
 export async function POST(req: Request) {
   try {
-    const validatedData = insertTransactionParams.parse(await req.json());
+    const transactionData = await req.json();
+    const validatedData = insertTransactionParams.parse(transactionData);
     const { transaction } = await createTransaction(validatedData);
 
     revalidatePath("/transactions"); // optional - assumes you will have named route same as entity

@@ -46,7 +46,9 @@ model TrackedWallet {
 
 model Transaction {
   id        String        @id @default(cuid())
-  signature String
+  signature String        @unique
+  from      String // Address of the sender
+  to        String // Address of the receiver
   wallet    TrackedWallet @relation(fields: [walletId], references: [id])
   walletId  String
   timestamp DateTime
@@ -58,6 +60,8 @@ model Transaction {
   chain     Chain
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+
+  @@index([signature])
 }
 
 enum Chain {

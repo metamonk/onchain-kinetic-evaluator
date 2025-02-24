@@ -1,4 +1,5 @@
 "use client";
+
 import { CompleteTrackedWallet } from "@/lib/db/schema/trackedWallets";
 import { trpc } from "@/lib/trpc/client";
 import TrackedWalletModal from "@/components/trackedWallets/TrackedWalletModal";
@@ -6,6 +7,7 @@ import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { Card, CardDescription, CardTitle, CardHeader } from "../ui/card"
+import { Badge } from "@/components/ui/badge";
 
 
 export default function TrackedWalletList({ trackedWallets }: { trackedWallets: CompleteTrackedWallet[] }) {
@@ -21,7 +23,7 @@ export default function TrackedWalletList({ trackedWallets }: { trackedWallets: 
   return (
     <ul>
       {t.trackedWallets.map((trackedWallet: CompleteTrackedWallet) => (
-        <TrackedWallet trackedWallet={trackedWallet} key={trackedWallet.id} />
+        <TrackedWallet trackedWallet={trackedWallet} key={trackedWallet.id}  />
       ))}
     </ul>
   );
@@ -37,23 +39,15 @@ const TrackedWallet = ({ trackedWallet }: { trackedWallet: CompleteTrackedWallet
   };
 
   return (
-    <li className="flex justify-between my-2">
+    <li className="w-full p-4 border rounded-md mb-2">
       <div className="w-full flex items-center gap-2">
-        <div>{trackedWallet.label}</div>
-        <Button
-          onClick={copyToClipboard}
-          variant="ghost"
-          size="icon"
-        >
-          {copied ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Copy className="w-4 h-4" />
-          )}
+        <Badge variant="default">{trackedWallet.chain}</Badge>
+        <div className="flex-grow">{trackedWallet.label}</div>
+        <Button onClick={copyToClipboard} variant="ghost" size="icon">
+          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
         </Button>
         <TrackedWalletModal trackedWallet={trackedWallet} emptyState={false} />
       </div>
-      
     </li>
   );
 };

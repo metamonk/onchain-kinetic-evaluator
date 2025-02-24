@@ -1,4 +1,5 @@
 import * as z from "zod"
+import { Chain } from "@prisma/client"
 import { CompleteTrackedWallet, relatedTrackedWalletSchema } from "./index"
 
 // Helper schema for JSON fields
@@ -10,6 +11,8 @@ const jsonSchema: z.ZodSchema<Json> = z.lazy(() => z.union([literalSchema, z.arr
 export const transactionSchema = z.object({
   id: z.string(),
   signature: z.string(),
+  from: z.string(),
+  to: z.string(),
   walletId: z.string(),
   timestamp: z.date(),
   type: z.string(),
@@ -17,6 +20,7 @@ export const transactionSchema = z.object({
   token: z.string().nullish(),
   status: z.string(),
   raw: jsonSchema,
+  chain: z.nativeEnum(Chain),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
