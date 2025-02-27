@@ -10,27 +10,49 @@ import {
 import { 
   transactionIdSchema,
   insertTransactionParams,
-  updateTransactionParams 
+  updateTransactionParams,
+  validateTransactionParams
 } from "@/lib/db/schema/transactions";
+import { categorizeWalletAddress } from "@/lib/utils"
 
 export async function POST(req: Request) {
+  console.log("POST request received");
   try {
     const transactionData = await req.json();
-    const validatedData = insertTransactionParams.parse(transactionData);
-    const { transaction } = await createTransaction(validatedData);
+    const validatedData = validateTransactionParams.parse(transactionData);
+    console.log("Validated data:", validatedData);
 
-    revalidatePath("/transactions"); // optional - assumes you will have named route same as entity
+    const chain = categorizeWalletAddress(validatedData.from);
+    if (chain === 'INVALID') {
+      throw new Error(`Invalid wallet address: ${validatedData.from}`);
+    }
+    console.log("Inferred chain:", chain);
 
-    return NextResponse.json(transaction, { status: 201 });
+    // Convert string fields to BigInt before passing to createTransaction
+    const transactionPayload = {
+      ...validatedData,
+      chain,
+      blockTime: BigInt(validatedData.blockTime),
+      blockNumber: BigInt(validatedData.blockNumber),
+      fee: validatedData.fee !== null ? BigInt(validatedData.fee) : null,
+    };
+    console.log("Transaction payload with BigInt:", transactionPayload);
+
+    const { transaction } = await createTransaction(transactionPayload);
+    console.log("Created transaction:", transaction);
+
+    revalidatePath("/transactions");
+    return NextResponse.json({ message: "Transaction created successfully" }, { status: 201 });
   } catch (err) {
     if (err instanceof z.ZodError) {
+      console.error('Validation errors:', err.issues);
       return NextResponse.json({ error: err.issues }, { status: 400 });
     } else {
-      return NextResponse.json({ error: err }, { status: 500 });
+      console.error('Server error:', err);
+      return NextResponse.json(err, { status: 500 });
     }
   }
 }
-
 
 export async function PUT(req: Request) {
   try {

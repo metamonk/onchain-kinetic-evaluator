@@ -11,7 +11,7 @@ export const userSchema = z.object({
 })
 
 export interface CompleteUser extends z.infer<typeof userSchema> {
-  trackedWallets: CompleteTrackedWallet[]
+  createdWallets: CompleteTrackedWallet[]
 }
 
 /**
@@ -20,5 +20,5 @@ export interface CompleteUser extends z.infer<typeof userSchema> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const relatedUserSchema: z.ZodSchema<CompleteUser> = z.lazy(() => userSchema.extend({
-  trackedWallets: relatedTrackedWalletSchema.array(),
+  createdWallets: relatedTrackedWalletSchema.array(),
 }))

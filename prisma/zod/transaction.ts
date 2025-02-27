@@ -1,32 +1,27 @@
 import * as z from "zod"
-import { Chain } from "@prisma/client"
+import { Chain, TransactionType, TransactionStatus } from "@prisma/client"
 import { CompleteTrackedWallet, relatedTrackedWalletSchema } from "./index"
-
-// Helper schema for JSON fields
-type Literal = boolean | number | string
-type Json = Literal | { [key: string]: Json } | Json[]
-const literalSchema = z.union([z.string(), z.number(), z.boolean()])
-const jsonSchema: z.ZodSchema<Json> = z.lazy(() => z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)]))
 
 export const transactionSchema = z.object({
   id: z.string(),
-  signature: z.string(),
-  from: z.string(),
-  to: z.string(),
-  walletId: z.string(),
-  timestamp: z.date(),
-  type: z.string(),
-  amount: z.number().nullish(),
-  token: z.string().nullish(),
-  status: z.string(),
-  raw: jsonSchema,
+  hash: z.string(),
   chain: z.nativeEnum(Chain),
+  from: z.string(),
+  to: z.string().nullish(),
+  blockTime: z.bigint(),
+  blockNumber: z.bigint(),
+  fee: z.bigint().nullish(),
+  type: z.nativeEnum(TransactionType),
+  status: z.nativeEnum(TransactionStatus),
+  value: z.string().nullish(),
+  tokenAmount: z.number().nullish(),
+  tokenAddress: z.string().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
 
 export interface CompleteTransaction extends z.infer<typeof transactionSchema> {
-  wallet: CompleteTrackedWallet
+  wallets: CompleteTrackedWallet[]
 }
 
 /**
@@ -35,5 +30,5 @@ export interface CompleteTransaction extends z.infer<typeof transactionSchema> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const relatedTransactionSchema: z.ZodSchema<CompleteTransaction> = z.lazy(() => transactionSchema.extend({
-  wallet: relatedTrackedWalletSchema,
+  wallets: relatedTrackedWalletSchema.array(),
 }))

@@ -5,11 +5,11 @@ import { CompleteUser, relatedUserSchema, CompleteTransaction, relatedTransactio
 export const trackedWalletSchema = z.object({
   id: z.string(),
   address: z.string(),
-  label: z.string().nullish(),
+  label: z.string(),
   userId: z.string(),
+  chain: z.nativeEnum(Chain),
   createdAt: z.date(),
   updatedAt: z.date(),
-  chain: z.nativeEnum(Chain),
 })
 
 export interface CompleteTrackedWallet extends z.infer<typeof trackedWalletSchema> {

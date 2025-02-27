@@ -96,18 +96,19 @@ const TrackedWalletForm = ({
       createTrackedWallet(values);
     }
   };
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className={"space-y-8"}>
         <FormField
           control={form.control}
           name="address"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Address</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
-
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -115,12 +116,12 @@ const TrackedWalletForm = ({
         <FormField
           control={form.control}
           name="label"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Label</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
-
+              <FormControl>
+                <Input {...field} value={field.value ?? ""} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

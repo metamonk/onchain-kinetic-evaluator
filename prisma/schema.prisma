@@ -20,6 +20,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Chain {
+  SOL
+  EVM
+}
+
+enum TransactionType {
+  TRANSFER
+  TOKEN_TRANSFER
+  SWAP
+  CONTRACT_CALL
+  OTHER
+}
+
+enum TransactionStatus {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
 model User {
   id             String          @id @default(cuid())
   privyId        String          @unique
@@ -27,44 +46,43 @@ model User {
   isAdmin        Boolean         @default(false)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
-  trackedWallets TrackedWallet[]
+  createdWallets TrackedWallet[] @relation("UserCreatedWallets") // Renamed and explicitly linked
 }
 
 model TrackedWallet {
   id           String        @id @default(cuid())
   address      String
-  label        String?
-  createdBy    User          @relation(fields: [userId], references: [id])
+  label        String
+  createdBy    User          @relation("UserCreatedWallets", fields: [userId], references: [id])
   userId       String
-  transactions Transaction[]
+  chain        Chain
+  transactions Transaction[] @relation("WalletTransactions")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  chain        Chain
 
-  @@unique([address])
+  @@unique([address, chain]) // Unique per chain
+  @@index([address])
 }
 
 model Transaction {
-  id        String        @id @default(cuid())
-  signature String        @unique
-  from      String // Address of the sender
-  to        String // Address of the receiver
-  wallet    TrackedWallet @relation(fields: [walletId], references: [id])
-  walletId  String
-  timestamp DateTime
-  type      String
-  amount    Float?
-  token     String?
-  status    String
-  raw       Json
-  chain     Chain
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id           String            @id @default(cuid())
+  hash         String            @unique
+  chain        Chain
+  from         String
+  to           String?
+  wallets      TrackedWallet[]   @relation("WalletTransactions")
+  blockTime    BigInt
+  blockNumber  BigInt
+  fee          BigInt?
+  type         TransactionType
+  status       TransactionStatus
+  value        String?
+  tokenAmount  Float?
+  tokenAddress String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
-  @@index([signature])
-}
-
-enum Chain {
-  SOL
-  EVM
+  @@index([hash])
+  @@index([blockTime])
+  @@index([blockNumber])
 }

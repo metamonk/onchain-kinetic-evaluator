@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "@solana/web3.js": "^2.0.0",
+    "async-sema": "^3.1.1",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "web3": "^4.16.0"
