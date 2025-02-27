@@ -16,17 +16,13 @@ import {
 import { categorizeWalletAddress } from "@/lib/utils"
 
 export async function POST(req: Request) {
-  console.log("POST request received");
   try {
     const transactionData = await req.json();
     const validatedData = validateTransactionParams.parse(transactionData);
-    console.log("Validated data:", validatedData);
-
     const chain = categorizeWalletAddress(validatedData.from);
     if (chain === 'INVALID') {
       throw new Error(`Invalid wallet address: ${validatedData.from}`);
     }
-    console.log("Inferred chain:", chain);
 
     // Convert string fields to BigInt before passing to createTransaction
     const transactionPayload = {
@@ -36,13 +32,11 @@ export async function POST(req: Request) {
       blockNumber: BigInt(validatedData.blockNumber),
       fee: validatedData.fee !== null ? BigInt(validatedData.fee) : null,
     };
-    console.log("Transaction payload with BigInt:", transactionPayload);
 
     const { transaction } = await createTransaction(transactionPayload);
-    console.log("Created transaction:", transaction);
 
     revalidatePath("/transactions");
-    return NextResponse.json({ message: "Transaction created successfully" }, { status: 201 });
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (err) {
     if (err instanceof z.ZodError) {
       console.error('Validation errors:', err.issues);

@@ -9,9 +9,7 @@ import {
 } from "@/lib/db/schema/transactions";
 
 export const createTransaction = async (transaction: NewTransactionParams) => {
-  console.log("Creating transaction:", transaction);
   const newTransaction = insertTransactionSchema.parse(transaction);
-  console.log("Parsed transaction:", newTransaction);
   try {
     const t = await db.transaction.create({ data: newTransaction });
     return { transaction: t };
